@@ -1,0 +1,93 @@
+<!doctype html>
+<html ng-app="fileApp" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Document Upload (MEAN-style)</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- favicon -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="shortcut icon" href="/favicon.svg">
+
+  <style>
+    /* small helper to show active drop area */
+    .drop-area { border: 2px dashed #ced4da; border-radius: .5rem; padding: 2rem; cursor: pointer; }
+    .drop-area.active { background: #e9f7ff; border-color: #80bdff; }
+  </style>
+</head>
+<body class="bg-light">
+<div class="container py-4" ng-controller="MainCtrl as vm">
+  <h2 class="mb-4">Document Manager</h2>
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link" ng-class="{active: vm.tab==='home'}" href="" ng-click="vm.setTab('home')">Home</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" ng-class="{active: vm.tab==='upload'}" href="" ng-click="vm.setTab('upload')">Upload Doc</a>
+    </li>
+  </ul>
+
+  <div class="tab-content mt-3">
+    <div ng-show="vm.tab==='home'">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Uploaded Documents</h5>
+          <div ng-if="vm.loadingDocs" class="text-center text-muted py-3">Loading...</div>
+          <div ng-if="!vm.loadingDocs && vm.docs.length===0" class="text-center text-muted py-3">No documents uploaded yet.</div>
+          <div ng-if="!vm.loadingDocs && vm.docs.length>0" class="table-responsive">
+            <table class="table table-sm table-hover">
+              <thead>
+                <tr>
+                  <th>Filename</th>
+                  <th>Size</th>
+                  <th>Uploaded</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="d in vm.docs">
+                  <td>{{d.filename}}</td>
+                  <td>{{vm.humanSize(d.size)}}</td>
+                  <td>{{d.createdAt | date:'medium'}}</td>
+                  <td class="text-right"><a class="btn btn-sm btn-outline-primary" ng-href="/api/documents/{{d.id}}" target="_blank">Download</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div ng-show="vm.tab==='upload'">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Upload Document</h5>
+
+          <div class="drop-area text-center mb-3" id="dropArea">
+            <div class="h4">📄</div>
+            <div class="lead">Drag & drop your file here</div>
+            <div class="small text-muted">or click to browse — accepted: .pdf, .doc, .docx, .txt</div>
+          </div>
+
+          <input type="file" id="fileInput" class="d-none" />
+
+          <div id="uploadDetails" class="mb-3 text-muted"></div>
+
+          <div class="d-flex">
+            <button class="btn btn-primary mr-2" ng-click="vm.upload()" ng-disabled="!vm.selectedFile || vm.uploading">Upload</button>
+            <button class="btn btn-secondary" ng-click="vm.clear()">Clear</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AngularJS and app script -->
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
