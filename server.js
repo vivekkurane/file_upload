@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
@@ -77,6 +78,20 @@ app.get('/api/documents/:id', async (req, res) => {
     console.error(err);
     res.status(500).send('Error fetching document');
   }
+});
+
+// DELETE /files/:name - delete a specific file by filename
+app.delete('/api/documents/:id', (req, res) => {
+  const id = req.params.id;
+  if (!id) return res.status(400).json({ error: 'Missing document' });
+
+  // adjust the uploads folder if your files live somewhere else
+  Document.findByIdAndDelete(id).then(() => {
+    res.json({ success: true });
+  }).catch(err => {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete document' });
+  });
 });
 
 // fallback to index.html for frontend routes

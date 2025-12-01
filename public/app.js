@@ -61,5 +61,20 @@
       // initial load
       vm.loadDocs();
 
+    vm.deleteDoc = function(doc){
+      if (!doc || !doc.id) return;
+      if (!confirm('Are you sure you want to delete "'+doc.filename+'"?')) return;
+      vm.deletingDocId = doc.id;
+
+      $http.delete('/api/documents/' + doc.id).then(function(){
+        vm.deletingDocId = null;
+        vm.loadDocs();
+      }, function(err){
+        vm.deletingDocId = null;
+        alert('Failed to delete document.');
+        console.error(err);
+      });
+    };
+
     }]);
 })();

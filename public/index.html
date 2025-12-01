@@ -44,6 +44,7 @@
                   <th>Size</th>
                   <th>Uploaded</th>
                   <th></th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -52,6 +53,7 @@
                   <td>{{vm.humanSize(d.size)}}</td>
                   <td>{{d.createdAt | date:'medium'}}</td>
                   <td class="text-right"><a class="btn btn-sm btn-outline-primary" ng-href="/api/documents/{{d.id}}" target="_blank">Download</a></td>
+                  <td class="text-right"><button class="btn btn-sm btn-outline-danger" ng-click="vm.deleteDoc(d)" ng-disabled="vm.deletingDocId===d.id">{{vm.deletingDocId===d.id ? 'Deleting...' : 'Delete'}}</button></td>
                 </tr>
               </tbody>
             </table>
