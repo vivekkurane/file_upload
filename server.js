@@ -4,12 +4,13 @@ const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Replace with your connection string or use environment variable
-const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://vivekkurane:shravani@cluster0.qmmpa8v.mongodb.net/?appName=Cluster0';
+const MONGO_URI = process.env.MONGO_URI 
 
 // middleware
 app.use(cors());

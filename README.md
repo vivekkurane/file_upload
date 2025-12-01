@@ -33,17 +33,8 @@ Notes
 - Files are stored in MongoDB. For production, consider using an object store (S3) and storing URLs in the DB.
 
 Deployment
- - For Heroku: add a `Procfile` (already included) and set the `MONGO_URI` config var on your app.
-	 ```powershell
-	 heroku config:set MONGO_URI="your_production_mongo_uri" --app your-app-name
-	 ```
- - GitHub Actions workflow ` .github/workflows/deploy-heroku.yml` is included. Add these GitHub secrets:
-	 - `HEROKU_API_KEY` (from `heroku auth:token`)
-	 - `HEROKU_APP_NAME` (your Heroku app name)
-	 - `HEROKU_EMAIL` (your Heroku account email)
- - Troubleshooting:
-	 - Check GitHub Actions logs under the repo Actions tab.
-	 - Check Heroku logs with:
-		 ```powershell
-		 heroku logs --tail --app your-app-name
-		 ```
+ use Render.com
+
+
+ # live URL
+ https://file-upload-app-wqlg.onrender.com/
