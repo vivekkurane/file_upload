@@ -67,6 +67,32 @@ app.get('/api/documents', async (req, res) => {
   }
 });
 
+// API: document metadata by id
+app.get('/api/documents/:id/metadata', async (req, res) => {
+  try {
+    const doc = await Document.findById(req.params.id).select('filename mimetype size createdAt').exec();
+    if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
+    res.json({ id: doc._id, filename: doc.filename, mimetype: doc.mimetype, size: doc.size, createdAt: doc.createdAt });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Error fetching metadata' });
+  }
+});
+
+// API: preview by id (inline)
+app.get('/api/documents/:id/preview', async (req, res) => {
+  try {
+    const doc = await Document.findById(req.params.id).exec();
+    if (!doc) return res.status(404).send('Not found');
+    res.setHeader('Content-Type', doc.mimetype || 'application/octet-stream');
+    res.setHeader('Content-Disposition', `inline; filename="${doc.filename}"`);
+    res.send(doc.data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching document');
+  }
+});
+
 // API: download by id
 app.get('/api/documents/:id', async (req, res) => {
   try {
@@ -86,7 +112,6 @@ app.delete('/api/documents/:id', (req, res) => {
   const id = req.params.id;
   if (!id) return res.status(400).json({ error: 'Missing document' });
 
-  // adjust the uploads folder if your files live somewhere else
   Document.findByIdAndDelete(id).then(() => {
     res.json({ success: true });
   }).catch(err => {

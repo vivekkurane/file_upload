@@ -1,0 +1,140 @@
+<!doctype html>
+<html ng-app="fileApp" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Document Preview</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-light">
+<div class="container py-4" ng-controller="PreviewCtrl as vm">
+  <div class="card card-modern">
+    <div class="card-body">
+      <h4 class="card-title">Document Preview</h4>
+      <div ng-if="vm.loading" class="text-center text-muted py-4">Loading preview...</div>
+      <div ng-if="vm.error" class="alert alert-danger">{{vm.error}}</div>
+
+      <div ng-if="!vm.loading && !vm.error">
+      <div class="mb-2">
+        <button class="btn btn-outline-secondary btn-pill mr-2" ng-click="vm.goBack()">← Back</button>
+      </div>
+
+      <div class="mb-3">
+        <strong>{{vm.doc.filename}}</strong>
+        <div class="text-muted">{{vm.humanSize(vm.doc.size)}} · {{vm.doc.mimetype || 'Unknown type'}}</div>
+      </div>
+
+      <div class="mb-3">
+        <a class="btn btn-gradient btn-pill mr-2" ng-href="/api/documents/{{vm.doc.id}}">Download</a>
+        <a class="btn btn-outline-secondary btn-pill" ng-href="/api/documents/{{vm.doc.id}}/preview">Open Raw Preview</a>
+      </div>
+
+        <!-- Viewer: PDF -> iframe (embedded), Images -> img, Text -> inline pre -->
+        <div ng-if="vm.viewerUrl">
+          <div ng-if="vm.isPdf" style="height:80vh;">
+            <iframe width="100%" height="100%" frameborder="0" ng-src="{{vm.trustedUrl}}"></iframe>
+          </div>
+
+          <div ng-if="vm.isImage" class="text-center">
+            <img ng-src="{{vm.viewerUrl}}" alt="{{vm.doc.filename}}" class="img-fluid" style="max-height:80vh;" />
+          </div>
+
+          <div ng-if="vm.isText">
+            <pre class="border p-3" style="max-height:70vh; overflow:auto; background:#f8f9fa;">{{vm.textContent}}</pre>
+          </div>
+
+          <div ng-if="vm.isOffice">
+            <!-- Office files often can't be rendered directly. Offer iframe via Google Docs Viewer as a fallback if allowed. -->
+            <div class="alert alert-info">Office file preview may be limited. Use the Download button or Open Raw Preview.</div>
+          </div>
+        </div>
+
+        <div class="alert alert-warning" ng-if="!vm.viewerUrl">
+          Preview is not available for this file type. Use the download button to open it locally.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script>
+(function(){
+  angular.module('fileApp', [])
+  .controller('PreviewCtrl', ['$http', '$location', '$sce', function($http, $location, $sce){
+      const vm = this;
+      vm.doc = {};
+      vm.loading = true;
+      vm.error = null;
+      vm.viewerUrl = null;
+    vm.trustedUrl = null;
+    vm.textContent = '';
+
+    vm.goBack = function(){ window.history.back(); };
+
+    vm.humanSize = function(bytes){
+      if (!bytes) return '0 B';
+      const thresh = 1024;
+      if (Math.abs(bytes) < thresh) return bytes + ' B';
+      const units = ['KB','MB','GB','TB'];
+      let u = -1;
+      do { bytes /= thresh; ++u; } while (Math.abs(bytes) >= thresh && u < units.length - 1);
+      return bytes.toFixed(1)+' '+units[u];
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (!id) {
+      vm.loading = false;
+      vm.error = 'No document id provided.';
+      return;
+    }
+
+    $http.get('/api/documents/' + id + '/metadata').then(function(res){
+      vm.doc = res.data;
+      vm.loading = false;
+
+      const previewableTypes = [
+        'application/pdf',
+        'text/plain',
+        'image/png',
+        'image/jpeg',
+        'image/gif'
+      ];
+
+      // determine viewer type flags
+      vm.isPdf = vm.doc.mimetype === 'application/pdf';
+      vm.isImage = vm.doc.mimetype && vm.doc.mimetype.indexOf('image/') === 0;
+      vm.isText = vm.doc.mimetype === 'text/plain';
+      vm.isOffice = [
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      ].indexOf(vm.doc.mimetype) !== -1;
+
+      if (previewableTypes.indexOf(vm.doc.mimetype) !== -1) {
+        vm.viewerUrl = '/api/documents/' + vm.doc.id + '/preview';
+        // trust the URL for iframe src
+        vm.trustedUrl = $sce.trustAsResourceUrl(vm.viewerUrl);
+
+        // if text, fetch the content to display inside <pre>
+        if (vm.isText) {
+          $http.get(vm.viewerUrl).then(function(resp){
+            vm.textContent = resp.data;
+          }).catch(function(){
+            vm.textContent = '[Failed to load text preview]';
+          });
+        }
+      }
+    }, function(err){
+      vm.loading = false;
+      vm.error = 'Document not found or failed to load.';
+      console.error(err);
+    });
+  }]);
+})();
+</script>
+</body>
+</html>

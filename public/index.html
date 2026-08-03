@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Document Upload (MEAN-style)</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/styles.css">
   <!-- favicon -->
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="shortcut icon" href="/favicon.svg">
@@ -17,7 +18,7 @@
 </head>
 <body class="bg-light">
 <div class="container py-4" ng-controller="MainCtrl as vm">
-  <h2 class="mb-4">Document Manager</h2>
+  <h2 class="mb-4 text-primary font-weight-bold">Document Manager</h2>
 
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
@@ -31,7 +32,7 @@
 
   <div class="tab-content mt-3">
     <div ng-show="vm.tab==='home'">
-      <div class="card">
+      <div class="card card-modern">
         <div class="card-body">
           <h5 class="card-title">Uploaded Documents</h5>
           <div ng-if="vm.loadingDocs" class="text-center text-muted py-3">Loading...</div>
@@ -49,11 +50,11 @@
               </thead>
               <tbody>
                 <tr ng-repeat="d in vm.docs">
-                  <td>{{d.filename}}</td>
+                  <td><a class="file-link" ng-href="/preview.html?id={{d.id}}">{{d.filename}}</a></td>
                   <td>{{vm.humanSize(d.size)}}</td>
                   <td>{{d.createdAt | date:'medium'}}</td>
-                  <td class="text-right"><a class="btn btn-sm btn-outline-primary" ng-href="/api/documents/{{d.id}}" target="_blank">Download</a></td>
-                  <td class="text-right"><button class="btn btn-sm btn-outline-danger" ng-click="vm.deleteDoc(d)" ng-disabled="vm.deletingDocId===d.id">{{vm.deletingDocId===d.id ? 'Deleting...' : 'Delete'}}</button></td>
+                  <td class="text-right"><a class="btn btn-sm btn-gradient btn-pill mr-2" ng-href="/api/documents/{{d.id}}">Download</a></td>
+                                    <td class="text-right"><button class="btn btn-sm btn-danger btn-pill" ng-click="vm.deleteDoc(d)" ng-disabled="vm.deletingDocId===d.id">{{vm.deletingDocId===d.id ? 'Deleting...' : 'Delete'}}</button></td>
                 </tr>
               </tbody>
             </table>
@@ -63,11 +64,11 @@
     </div>
 
     <div ng-show="vm.tab==='upload'">
-      <div class="card">
+      <div class="card card-modern">
         <div class="card-body">
           <h5 class="card-title">Upload Document</h5>
 
-          <div class="drop-area text-center mb-3" id="dropArea">
+          <div class="drop-area text-center mb-3 d-flex align-items-center justify-content-center flex-column" id="dropArea">
             <div class="h4">📄</div>
             <div class="lead">Drag & drop your file here</div>
             <div class="small text-muted">or click to browse — accepted: .pdf, .doc, .docx, .txt</div>
