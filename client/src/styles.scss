@@ -55,7 +55,22 @@ pre{ background: #fbfdff; border-radius:8px; }
 
 iframe{ border-radius:8px; border:1px solid rgba(15,23,42,0.03); }
 
+.selected-file-row{ background:#f8fafc; border-radius:10px; }
+.doc-card-mobile{ background:#f8fafc; border-radius:12px; padding:12px; margin-bottom:10px; }
+
+@media (max-width:767px){
+  .container{ padding-left: 1rem; padding-right: 1rem; }
+  .card-body{ padding: 1rem; }
+  .navbar-brand{ font-size: 1.05rem; }
+  .btn{ width:100%; }
+  .btn.btn-sm{ width:auto; }
+}
+
 @media (max-width:575px){
   .drop-area{ padding:1.25rem; }
+  .lead{ font-size:1rem; }
+  .h4{ font-size:1.65rem !important; }
+  .navbar{ padding: .75rem 0; }
+  .navbar-nav{ width: 100%; }
 }
 

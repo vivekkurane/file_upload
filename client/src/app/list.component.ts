@@ -13,8 +13,8 @@ import { DocumentService, DocMeta } from './document.service';
       <h5 class="card-title">Uploaded Documents</h5>
       <div *ngIf="loading" class="text-center text-muted py-3">Loading...</div>
       <div *ngIf="!loading && docs.length===0" class="text-center text-muted py-3">No documents uploaded yet.</div>
-      <div *ngIf="!loading && docs.length>0" class="table-responsive">
-        <table class="table table-sm table-hover">
+      <div *ngIf="!loading && docs.length>0" class="table-responsive d-none d-md-block">
+        <table class="table table-sm table-hover mb-0">
           <thead>
             <tr><th>Filename</th><th>Size</th><th>Uploaded</th><th></th><th></th></tr>
           </thead>
@@ -28,6 +28,19 @@ import { DocumentService, DocMeta } from './document.service';
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div *ngIf="!loading && docs.length>0" class="d-md-none">
+        <div *ngFor="let d of docs" class="doc-card-mobile">
+          <div class="mb-2">
+            <a [routerLink]="['/preview', d.id]" class="file-link">{{d.filename}}</a>
+            <div class="small text-muted">{{humanSize(d.size)}} · {{d.createdAt | date:'medium'}}</div>
+          </div>
+          <div class="d-flex gap-2">
+            <a class="btn btn-sm btn-gradient btn-pill flex-fill" [href]="service.downloadUrl(d.id)">Download</a>
+            <button class="btn btn-sm btn-danger btn-pill flex-fill" (click)="deleteDoc(d)">Delete</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -10,28 +10,28 @@ import { DocumentService } from './document.service';
   <div class="card card-modern">
     <div class="card-body">
       <h5 class="card-title">Upload Document</h5>
-      <div class="drop-area text-center mb-3 d-flex align-items-center justify-content-center flex-column" (click)="fileInput.click()" (drop)="$event.preventDefault(); onFileDrop($event)">
-        <div class="h4">📄</div>
+      <div class="drop-area text-center mb-3 d-flex align-items-center justify-content-center flex-column p-3 p-md-4" (click)="fileInput.click()" (drop)="$event.preventDefault(); onFileDrop($event)">
+        <div class="h4 mb-2">📄</div>
         <div class="lead">Drag & drop your file(s) here</div>
         <div class="small text-muted">or click to browse — accepted: .pdf, .doc, .docx, .txt</div>
         <input type="file" multiple style="display:none" #fileInput (change)="onFile($event)" />
       </div>
 
       <div *ngIf="selected.length>0" class="mb-2">
-        <div *ngFor="let f of selected; let i = index" class="d-flex align-items-center justify-content-between mb-1">
-          <div>
+        <div *ngFor="let f of selected; let i = index" class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between mb-2 p-2 selected-file-row">
+          <div class="mb-2 mb-sm-0">
             <strong class="file-link">{{f.name}}</strong>
             <div class="small text-muted">{{humanSize(f.size)}}</div>
           </div>
           <div>
-            <button class="btn btn-sm btn-outline-secondary btn-pill mr-2" (click)="removeAt(i)">Remove</button>
+            <button class="btn btn-sm btn-outline-secondary btn-pill" (click)="removeAt(i)">Remove</button>
           </div>
         </div>
       </div>
 
-      <div class="mt-3">
-        <button class="btn btn-gradient btn-pill mr-2" (click)="upload()" [disabled]="selected.length===0 || uploading">Upload</button>
-        <button class="btn btn-secondary" (click)="clear()">Clear</button>
+      <div class="mt-3 d-flex flex-column flex-sm-row gap-2">
+        <button class="btn btn-gradient btn-pill" (click)="upload()" [disabled]="selected.length===0 || uploading">Upload</button>
+        <button class="btn btn-secondary btn-pill" (click)="clear()">Clear</button>
       </div>
     </div>
   </div>

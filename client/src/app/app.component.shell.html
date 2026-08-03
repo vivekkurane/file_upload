@@ -1,12 +1,15 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-white mb-4 shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-light bg-white mb-3 mb-md-4 shadow-sm">
   <div class="container">
-    <a class="navbar-brand" routerLink="/">Document Manager</a>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav mr-auto">
+    <a class="navbar-brand font-weight-bold" routerLink="/">Document Manager</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
         <li class="nav-item"><a class="nav-link" routerLink="/">Home</a></li>
         <li class="nav-item"><a class="nav-link" routerLink="/upload">Upload</a></li>
       </ul>
-      <button *ngIf="canInstall" class="btn btn-gradient btn-pill" (click)="installPwa()">Install App</button>
+      <button *ngIf="canInstall" class="btn btn-gradient btn-pill mt-2 mt-lg-0" (click)="installPwa()">Install App</button>
     </div>
   </div>
 </nav>
