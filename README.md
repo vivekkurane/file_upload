@@ -8,8 +8,6 @@ This is a minimal MEAN-style (MongoDB, Express, AngularJS, Node) project that de
 Files added:
 - `server.js` - Express backend with APIs
 - `package.json` - dependencies and start script
-- `public/index.html` - AngularJS frontend (Home and Upload tabs)
-- `public/app.js` - frontend controller and upload logic
 
 Setup
 1. Install dependencies:

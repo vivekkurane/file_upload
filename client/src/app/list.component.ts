@@ -53,5 +53,5 @@ export class ListComponent implements OnInit {
   ngOnInit(){ this.load(); }
   humanSize(bytes: number){ if(!bytes) return '0 B'; const thresh=1024; if(Math.abs(bytes)<thresh) return bytes+' B'; const units=['KB','MB','GB','TB']; let u=-1; do{ bytes/=thresh; ++u;} while(Math.abs(bytes)>=thresh && u<units.length-1); return bytes.toFixed(1)+' '+units[u]; }
   load(){ this.loading=true; this.service.list().subscribe(d=>{ this.docs=d; this.loading=false; }, ()=>{ this.loading=false; }); }
-  deleteDoc(d: DocMeta){ if(!confirm('Delete "'+d.filename+'"?')) return; this.service && fetch('/api/documents/'+d.id, { method: 'DELETE' }).then(()=>this.load()); }
+ deleteDoc(d: DocMeta){ if(!confirm('Delete "'+d.filename+'"?')) return; this.service.deleteDocument(d.id).subscribe(() => { this.load(); this.service.notifyStorageChanged(); }); }
 }

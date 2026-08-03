@@ -17,7 +17,11 @@ import { DocumentService } from './document.service';
         <input type="file" multiple style="display:none" #fileInput (change)="onFile($event)" />
       </div>
 
-      <div *ngIf="selected.length>0" class="mb-2">
+      <div *ngIf="selected.length>0" class="mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <strong>Selected documents ({{selected.length}})</strong>
+          <button class="btn btn-sm btn-outline-secondary btn-pill" (click)="clear()">Clear all</button>
+        </div>
         <div *ngFor="let f of selected; let i = index" class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between mb-2 p-2 selected-file-row">
           <div class="mb-2 mb-sm-0">
             <strong class="file-link">{{f.name}}</strong>
@@ -30,8 +34,8 @@ import { DocumentService } from './document.service';
       </div>
 
       <div class="mt-3 d-flex flex-column flex-sm-row gap-2">
-        <button class="btn btn-gradient btn-pill" (click)="upload()" [disabled]="selected.length===0 || uploading">Upload</button>
-        <button class="btn btn-secondary btn-pill" (click)="clear()">Clear</button>
+        <button class="btn btn-gradient btn-pill" (click)="upload()" [disabled]="selected.length===0 || uploading">{{uploading ? 'Uploading...' : 'Upload'}}</button>
+        <button class="btn btn-secondary btn-pill" (click)="clear()" [disabled]="uploading">Clear</button>
       </div>
     </div>
   </div>
@@ -49,6 +53,14 @@ export class UploadComponent {
   upload(){ if(this.selected.length===0) return; this.uploading=true; const fd = new FormData();
     // append all files using the same field name (server uses upload.any())
     this.selected.forEach(f => fd.append('documents', f, f.name));
-    this.service.uploadMultiple(fd).subscribe(()=>{ this.uploading=false; this.clear(); alert('Uploaded'); }, ()=>{ this.uploading=false; alert('Upload failed'); });
+    this.service.uploadMultiple(fd).subscribe(() => {
+      this.uploading = false;
+      this.clear();
+      this.service.notifyStorageChanged();
+      alert('Uploaded');
+    }, () => {
+      this.uploading = false;
+      alert('Upload failed');
+    });
   }
 }

@@ -16,7 +16,6 @@ const MONGO_URI = process.env.MONGO_URI
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Mongoose setup
 mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -34,13 +33,19 @@ const DocumentSchema = new mongoose.Schema({
 const Document = mongoose.model('Document', DocumentSchema);
 
 // Multer (memory storage)
-// Keep a per-file limit of 50MB. Use upload.any() so the endpoint accepts single or multiple file fields.
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
+// Accept repeated file fields via the same field name used by the Angular client.
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024, files: 20 }
+});
 
 // API: upload (accept single or multiple files)
-app.post('/api/upload', upload.any(), async (req, res) => {
+app.post('/api/upload', upload.fields([
+  { name: 'documents', maxCount: 20 },
+  { name: 'document', maxCount: 20 }
+]), async (req, res) => {
   try {
-    const files = req.files || [];
+    const files = Object.values(req.files || {}).flat();
     if (!files || files.length === 0) return res.status(400).json({ success: false, message: 'No file uploaded' });
 
     const saved = [];
@@ -162,12 +167,17 @@ app.delete('/api/documents/:id', (req, res) => {
   });
 });
 
-// If an Angular client build exists, serve it; otherwise fall back to public/
+// Serve the Angular build first, then fall back to the legacy public files.
 const clientDist = path.join(__dirname, 'client', 'dist', 'client');
-if (fs.existsSync(clientDist)) {
-  app.use(express.static(clientDist));
+const angularBrowserDist = path.join(clientDist, 'browser');
+if (fs.existsSync(angularBrowserDist)) {
+  app.use(express.static(angularBrowserDist));
+}
+app.use(express.static(path.join(__dirname, 'public')));
+
+if (fs.existsSync(angularBrowserDist)) {
   app.get('*', (req, res) => {
-    res.sendFile(path.join(clientDist, 'index.html'));
+    res.sendFile(path.join(angularBrowserDist, 'index.html'));
   });
 } else {
   // fallback to index.html for frontend routes
