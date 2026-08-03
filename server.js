@@ -34,22 +34,29 @@ const DocumentSchema = new mongoose.Schema({
 const Document = mongoose.model('Document', DocumentSchema);
 
 // Multer (memory storage)
+// Keep a per-file limit of 50MB. Use upload.any() so the endpoint accepts single or multiple file fields.
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
-// API: upload
-app.post('/api/upload', upload.single('document'), async (req, res) => {
+// API: upload (accept single or multiple files)
+app.post('/api/upload', upload.any(), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+    const files = req.files || [];
+    if (!files || files.length === 0) return res.status(400).json({ success: false, message: 'No file uploaded' });
 
-    const doc = new Document({
-      filename: req.file.originalname,
-      mimetype: req.file.mimetype,
-      size: req.file.size,
-      data: req.file.buffer
-    });
+    const saved = [];
+    for (const f of files) {
+      // multer puts buffer on f.buffer when using memoryStorage
+      const doc = new Document({
+        filename: f.originalname || f.filename,
+        mimetype: f.mimetype,
+        size: f.size || (f.buffer && f.buffer.length) || 0,
+        data: f.buffer
+      });
+      await doc.save();
+      saved.push({ id: doc._id, filename: doc.filename });
+    }
 
-    await doc.save();
-    res.json({ success: true, id: doc._id });
+    res.json({ success: true, files: saved });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Upload failed' });
@@ -64,6 +71,41 @@ app.get('/api/documents', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Error listing documents' });
+  }
+});
+
+// API: storage summary (report database/collection storage usage, not local file sizes)
+app.get('/api/storage', async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+
+    // DB-level stats
+    let dbStats = {};
+    try { dbStats = await db.command({ dbStats: 1 }); } catch (e) { dbStats = {}; }
+
+    // Collection-level stats for the documents collection
+    let collStats = {};
+    try { collStats = await db.collection('documents').stats(); } catch (e) { collStats = {}; }
+
+    // Prefer using storageSize (allocated on disk) as the 'total' shown to users. Fallback to size.
+    const total = collStats.storageSize || collStats.size || 0;
+    const dataSize = collStats.size || 0;
+    const count = collStats.count || 0;
+
+    const quota = process.env.STORAGE_QUOTA ? parseInt(process.env.STORAGE_QUOTA, 10) : null;
+    const remaining = quota != null ? Math.max(0, quota - total) : null;
+
+    res.json({
+      total,
+      dataSize,
+      count,
+      dbStorageSize: dbStats.storageSize || null,
+      quota,
+      remaining
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Error calculating storage' });
   }
 });
 
@@ -120,9 +162,18 @@ app.delete('/api/documents/:id', (req, res) => {
   });
 });
 
-// fallback to index.html for frontend routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// If an Angular client build exists, serve it; otherwise fall back to public/
+const clientDist = path.join(__dirname, 'client', 'dist', 'client');
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+} else {
+  // fallback to index.html for frontend routes
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
+}
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

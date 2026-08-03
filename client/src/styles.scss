@@ -1,0 +1,61 @@
+/* You can add global styles to this file, and also import other style files */
+
+:root{
+  --bg:#f6f8fb;
+  --card:#ffffff;
+  --primary-start:#4f46e5; /* indigo-600 */
+  --primary-end:#06b6d4;   /* cyan-500 */
+  --muted:#6b7280;
+}
+
+body{
+  background: linear-gradient(180deg, var(--bg), #ffffff 60%);
+  color:#111827;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+h2, .card-title{ font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+
+.card-modern{
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+  border: 1px solid rgba(15,23,42,0.04);
+}
+
+.drop-area{
+  border-radius: 12px;
+  transition: all .18s ease-in-out;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(250,250,250,0.6));
+}
+
+.drop-area .h4{ font-size:2.25rem; }
+
+.drop-area.active{
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(79,70,229,0.08);
+  border-color: rgba(79,70,229,0.5);
+}
+
+.btn-gradient{
+  background: linear-gradient(90deg,var(--primary-start),var(--primary-end));
+  border: none;
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(79,70,229,0.12);
+}
+
+.btn-pill{ border-radius: 999px; }
+
+.table tbody tr:hover{ background: rgba(99,102,241,0.03); }
+
+.file-link{ color: #0f172a; font-weight:600; }
+.file-link:hover{ color: var(--primary-start); text-decoration: underline; }
+
+pre{ background: #fbfdff; border-radius:8px; }
+
+iframe{ border-radius:8px; border:1px solid rgba(15,23,42,0.03); }
+
+@media (max-width:575px){
+  .drop-area{ padding:1.25rem; }
+}
+

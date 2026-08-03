@@ -5,8 +5,11 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
-  },
+    "dev": "nodemon server.js",
+    "client:install": "cd client && npm install",
+    "client:start": "nodemon server.js && cd client && npx ng serve",
+    "client:build": "cd client && npx ng build --configuration production"
+    },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

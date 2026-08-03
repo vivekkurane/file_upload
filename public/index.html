@@ -20,6 +20,25 @@
 <div class="container py-4" ng-controller="MainCtrl as vm">
   <h2 class="mb-4 text-primary font-weight-bold">Document Manager</h2>
 
+  <!-- Storage summary -->
+  <div class="mb-3 d-flex align-items-center justify-content-between">
+    <div>
+      <small class="text-muted">Storage used</small>
+      <div class="font-weight-bold" style="font-size:0.95rem;">{{vm.humanSize(vm.storage.total)}}
+        <span ng-if="vm.storage.quota"> / {{vm.humanSize(vm.storage.quota)}}</span>
+      </div>
+    </div>
+    <div style="flex:1; margin:0 1rem;">
+      <div class="progress" style="height:10px; border-radius:999px; overflow:hidden; background:#eef2ff;">
+        <div class="progress-bar" role="progressbar" aria-valuenow="{{vm.storagePercent}}" aria-valuemin="0" aria-valuemax="100" ng-style="{width: vm.storagePercent + '%', background:'linear-gradient(90deg, #6366F1, #06B6D4)'}"></div>
+      </div>
+    </div>
+    <div>
+      <small class="text-muted">Remaining</small>
+      <div class="font-weight-bold" style="font-size:0.95rem;">{{ vm.storage.quota ? vm.humanSize(vm.storage.remaining) : '—' }}</div>
+    </div>
+  </div>
+
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
     <li class="nav-item">

@@ -8,7 +8,7 @@
       vm.selectedFile = null;
       vm.uploading = false;
 
-      vm.setTab = function(t){ vm.tab = t; if (t==='home') vm.loadDocs(); };
+      vm.setTab = function(t){ vm.tab = t; if (t==='home') { vm.loadDocs(); vm.loadStorage(); } };
 
       vm.humanSize = function(bytes){
         if (!bytes) return '0 B';
@@ -22,7 +22,22 @@
 
       vm.loadDocs = function(){
         vm.loadingDocs = true;
-        $http.get('/api/documents').then(function(res){ vm.docs = res.data; vm.loadingDocs = false; }, function(){ vm.loadingDocs = false; });
+        $http.get('/api/documents').then(function(res){ vm.docs = res.data; vm.loadingDocs = false; vm.loadStorage(); }, function(){ vm.loadingDocs = false; });
+      };
+
+      vm.loadStorage = function(){
+        $http.get('/api/storage').then(function(res){
+          vm.storage = res.data || { total:0, quota:null, remaining:null };
+          if (vm.storage.quota) {
+            vm.storagePercent = Math.min(100, Math.round((vm.storage.total / vm.storage.quota) * 100));
+          } else {
+            vm.storagePercent = 0;
+          }
+        }, function(err){
+          console.error('Failed to load storage summary', err);
+          vm.storage = { total:0, quota:null, remaining:null };
+          vm.storagePercent = 0;
+        });
       };
 
       // drag/drop handling
@@ -50,8 +65,9 @@
         $http.post('/api/upload', fd, { headers: {'Content-Type': undefined}, transformRequest: angular.identity })
           .then(function(res){
             vm.uploading = false; vm.selectedFile = null; fileInput.value = ''; uploadDetails.innerHTML = '<span class="text-success">Uploaded</span>';
-            // refresh home list
+            // refresh home list and storage
             vm.setTab('home');
+            // vm.loadStorage will be called from setTab -> loadDocs
           }, function(err){
             vm.uploading = false; uploadDetails.innerHTML = '<span class="text-danger">Upload failed</span>';
             console.error(err);
@@ -69,6 +85,7 @@
       $http.delete('/api/documents/' + doc.id).then(function(){
         vm.deletingDocId = null;
         vm.loadDocs();
+        vm.loadStorage();
       }, function(err){
         vm.deletingDocId = null;
         alert('Failed to delete document.');
